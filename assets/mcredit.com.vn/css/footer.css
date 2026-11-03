@@ -1,0 +1,489 @@
+/* ==========================================================================
+   MCREDIT — FOOTER MỚI (theo Figma "Footer Readjustment")
+   --------------------------------------------------------------------------
+   Desktop artboard : 1920 x 562  | padding ngang 215px  -> content 1490px
+   Mobile  artboard : 430  x 932  | padding ngang 47px
+   Màu nền footer   : #141ED2
+   Card / thanh cuối: #0073F0 @36% (đè lên #141ED2 -> ra #0D3DDD)
+   Viền card        : 1px #00B4FA (inside), radius 24 desktop / 16 mobile
+   Đường kẻ ngang   : 1px #00B4FA
+   Chữ nhấn desktop : #B6D5FA  (= #FFFFFF phủ #0A73F0 @30%)
+   Chữ nhấn mobile  : #98E2FF @78% (đè lên nền -> ra #7BB7F5)
+   Link trong legal : #00B4FA (bold)
+   Font             : Be Vietnam Pro
+   --------------------------------------------------------------------------
+   Cách dùng: thêm file này vào bundle CSS (hoặc <link> sau bundle.min.css).
+   Markup tương ứng nằm trong Views/.../Footer/Default.cshtml
+   ========================================================================== */
+
+.ftn,
+.ftn * {
+    box-sizing: border-box;
+}
+
+.ftn {
+    background: #141ED2;
+    color: #fff;
+    font-family: "Be Vietnam Pro", "Helvetica Neue", Arial, sans-serif;
+}
+
+.ftn a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.ftn a:hover {
+    color: #98E2FF;
+    text-decoration: none;
+}
+
+.ftn p {
+    margin: 0;
+}
+
+.ftn ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Nhãn / giá trị dùng chung cho card thông tin */
+.ftn .ftn-label {
+    font-weight: 700;
+}
+
+.ftn .ftn-value {
+    font-weight: 400;
+}
+
+/* Cụm icon mạng xã hội (Zalo – Facebook – Youtube – TikTok) */
+.ftn .ftn-social {
+    display: flex;
+    align-items: center;
+}
+
+.ftn .ftn-social-icon img {
+    display: block;
+    height: auto;
+}
+
+/* Cụm nút tải app (App Store – Google Play) */
+.ftn .ftn-stores {
+    display: flex;
+    align-items: center;
+}
+
+.ftn .ftn-stores img {
+    display: block;
+    width: auto;
+    /*border-radius: 4px;*/
+}
+
+
+/* ==========================================================================
+   DESKTOP
+   ========================================================================== */
+
+.ftn-desktop {
+    padding: 51px 0 54px;
+}
+
+.ftn-desktop .ftn-container {
+    max-width: 1490px; /* 1920 - 215*2 */
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+/* -------- Hàng trên: Hotline + Card liên hệ -------- */
+.ftn-desktop .ftn-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 40px;
+}
+
+.ftn-desktop .ftn-hotline {
+    padding-top: 24px; /* Figma: card y=51, text y=75 */
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.ftn-desktop .ftn-hotline-label {
+    font-size: 20px;
+    line-height: 32px;
+    font-weight: 700;
+}
+
+.ftn-desktop .ftn-hotline-word,
+.ftn-desktop .ftn-hotline-number {
+    font-size: 70px;
+    font-weight: 700;
+    letter-spacing: 0;
+}
+
+.ftn-desktop .ftn-hotline-word {
+    line-height: 79px;
+    color: #B6D5FA;
+}
+
+.ftn-desktop .ftn-hotline-number {
+    line-height: 89px;
+    color: #fff;
+}
+
+.ftn-desktop .ftn-hotline-number a:hover {
+    color: #98E2FF;
+}
+
+/* Card xanh */
+.ftn-desktop .ftn-card {
+    flex: 0 0 777px;
+    max-width: 777px;
+    min-height: 247px;
+    /* Figma: fill #0073F0 @36% đè lên nền #141ED2 -> #0D3DDD */
+    background: rgba(0, 115, 240, .36);
+    border: 1px solid #00B4FA;
+    border-radius: 24px;
+    padding: 24px 40px 28px 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.ftn-desktop .ftn-card-body {
+    display: flex;
+    gap: 60px;
+}
+
+.ftn-desktop .ftn-card-col {
+    flex: 1 1 0;
+    min-width: 0;
+    font-size: 20px;
+    line-height: 30px;
+}
+
+.ftn-desktop .ftn-card-col .ftn-label {
+    margin-top: 8px;
+}
+
+.ftn-desktop .ftn-card-col .ftn-label:first-child {
+    margin-top: 0;
+}
+
+.ftn-desktop .ftn-social {
+    gap: 29px; /* Figma: icon 41px, khoảng cách tâm 70px */
+    margin-top: 24px;
+}
+
+.ftn-desktop .ftn-social-icon img {
+    width: 41px;
+    height: 41px;
+}
+
+/* -------- Hàng dưới: QR + App | Menu + Legal -------- */
+.ftn-desktop .ftn-bottom {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 40px;
+    margin-top: 46px;
+}
+
+.ftn-desktop .ftn-app {
+    display: flex;
+    align-items: flex-start;
+    gap: 46px;
+    padding-top: 6px;
+}
+
+/* QR trong Figma là ảnh PNG các ô màu trắng, nền trong suốt -> đặt thẳng
+   lên nền #141ED2, KHÔNG bọc khung trắng. */
+.ftn-qr-wrapper {
+    position: relative;
+    width: 153px;
+    height: 153px;
+    overflow: hidden;
+}
+.ftn-desktop .ftn-qr {
+    width: 153px;
+    height: 153px;
+    display: block;
+}
+/*.ftn-qr-wrapper::after {*/
+/*    content: "";*/
+/*    position: absolute;*/
+/*    inset: 0;*/
+/*    background: linear-gradient(*/
+/*            to bottom,*/
+/*            rgba(24, 119, 242, 1) 10%,*/
+/*            rgba(24, 119, 242, 0.85) 25%,*/
+/*            rgba(100, 170, 250, 0.5) 55%,*/
+/*            rgba(180, 210, 250, 0.15) 80%,*/
+/*            rgba(255, 255, 255, 0) 100%*/
+/*    );*/
+/*    pointer-events: none;*/
+/*}*/
+
+.ftn-desktop .ftn-app-title {
+    font-size: 44px;
+    line-height: 60px;
+    font-weight: 700;
+    color: #fff; /* dòng 2 "khoản vay dễ dàng!" là trắng */
+    margin-top: -8px;
+}
+
+/* Dòng 1 "Quét mã quản lý" = #FFFFFF phủ #0A73F0 @30% */
+.ftn-desktop .ftn-app-title .ftn-accent {
+    color: #B6D5FA;
+}
+
+.ftn-desktop .ftn-app .ftn-stores {
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.ftn-desktop .ftn-app .ftn-stores img {
+    height: 33px;
+}
+
+/* Cột phải */
+.ftn-desktop .ftn-side {
+    flex: 0 0 734px;
+    max-width: 734px;
+}
+
+.ftn-desktop .ftn-links {
+    /* Figma: 3 cột x 2 dòng, đổ theo cột. column-count giữ đúng thứ tự này
+       kể cả khi số item trong BottomMenu thay đổi. */
+    /*column-count: 2;*/
+    /*column-gap: 22px;*/
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: 22px;
+    row-gap: 4px;
+}
+
+.ftn-desktop .ftn-links li {
+    font-size: 20px;
+    line-height: 28px;
+    font-weight: 700;
+    margin-bottom: 0;
+}
+
+.ftn-desktop .ftn-divider {
+    height: 1px;
+    background: #00B4FA;
+    margin: 16px 0 22px;
+}
+
+.ftn-desktop .ftn-legal {
+    font-size: 14px;
+    line-height: 22px;
+    font-weight: 400;
+}
+
+.ftn-desktop .ftn-legal a {
+    color: #00B4FA;
+    font-weight: 700;
+}
+
+/* Màn hình desktop nhỏ hơn artboard */
+@media (max-width: 1440px) {
+    .ftn-desktop .ftn-hotline-word,
+    .ftn-desktop .ftn-hotline-number {
+        font-size: 56px;
+        line-height: 68px;
+    }
+
+    .ftn-desktop .ftn-card {
+        flex: 0 1 640px;
+        padding: 24px 32px;
+    }
+
+    .ftn-desktop .ftn-card-body {
+        gap: 32px;
+    }
+
+    .ftn-desktop .ftn-app-title {
+        font-size: 34px;
+        line-height: 46px;
+    }
+
+    .ftn-desktop .ftn-side {
+        flex: 0 1 620px;
+    }
+
+    .ftn-desktop .ftn-links li {
+        font-size: 17px;
+    }
+}
+
+@media (max-width: 1100px) {
+    .ftn-desktop .ftn-top,
+    .ftn-desktop .ftn-bottom {
+        flex-direction: column;
+    }
+
+    .ftn-desktop .ftn-card,
+    .ftn-desktop .ftn-side {
+        flex: 1 1 auto;
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .ftn-desktop .ftn-links {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+
+/* ==========================================================================
+   MOBILE
+   ========================================================================== */
+
+.ftn-mobile {
+    padding: 52px 47px 0;
+}
+
+/* Card xanh chứa hotline + thông tin liên hệ + social */
+.ftn-mobile .ftn-m-card {
+    background: rgba(0, 115, 240, .36);
+    border: 1px solid #00B4FA;
+    border-radius: 16px;
+    padding: 28px 20px 24px;
+    text-align: center;
+}
+
+.ftn-mobile .ftn-m-label {
+    font-size: 14px;
+    line-height: 32px;
+    font-weight: 700;
+}
+
+.ftn-mobile .ftn-m-hotline {
+    font-size: 35px;
+    line-height: 45px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.ftn-mobile .ftn-m-row {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 18px;
+}
+
+.ftn-mobile .ftn-m-col {
+    flex: 0 1 140px;
+}
+
+.ftn-mobile .ftn-m-block {
+    margin-top: 16px;
+}
+
+.ftn-mobile .ftn-m-card .ftn-label,
+.ftn-mobile .ftn-m-card .ftn-value {
+    font-size: 14px;
+    line-height: 21px;
+}
+
+.ftn-mobile .ftn-social {
+    justify-content: center;
+    gap: 19px; /* Figma: icon 28px, khoảng cách tâm 47px */
+    margin-top: 22px;
+}
+
+.ftn-mobile .ftn-social-icon img {
+    width: 28px;
+    height: 28px;
+}
+
+/* Tiêu đề app */
+.ftn-mobile .ftn-m-title {
+    font-size: 33px;
+    line-height: 36px;
+    font-weight: 700;
+    color: #fff; /* "ngay trên ứng dụng Mcredit" là trắng */
+    text-align: center;
+    margin: 46px auto 0;
+    max-width: 320px;
+}
+
+/* "Quản lý khoản vay dễ dàng" = #98E2FF @78% -> #7BB7F5 trên nền #141ED2 */
+.ftn-mobile .ftn-m-title .ftn-accent {
+    color: rgba(152, 226, 255, .78);
+}
+
+.ftn-mobile .ftn-stores {
+    justify-content: center;
+    gap: 8px;
+    margin-top: 22px;
+}
+
+.ftn-mobile .ftn-stores img {
+    height: 28px;
+}
+
+/* Menu 2 cột */
+.ftn-mobile .ftn-links {
+    column-count: 2;
+    column-gap: 12px;
+    margin-top: 50px;
+    padding-bottom: 42px;
+}
+
+.ftn-mobile .ftn-links li {
+    font-size: 14px;
+    line-height: 21px;
+    font-weight: 700;
+    margin-bottom: 5px;
+    break-inside: avoid;
+}
+
+/* Thanh xanh cuối trang */
+.ftn-m-legal {
+    /* Figma: Rectangle 4 - fill #0073F0 @36%, KHÔNG bo góc, KHÔNG viền.
+       Block này nằm NGOÀI .ftn nên không có nền #141ED2 phía sau ->
+       phải tự dựng lại 2 lớp, nếu không màu 36% sẽ đè lên nền trắng.
+       Kết quả cuối = #0D3DDD, giống card. */
+    background: linear-gradient(rgba(0, 115, 240, .36), rgba(0, 115, 240, .36)) #141ED2;
+    color: #fff;
+    padding: 24px 56px;
+    text-align: center;
+    font-family: "Be Vietnam Pro", "Helvetica Neue", Arial, sans-serif;
+}
+
+.ftn-m-legal p {
+    margin: 0;
+    font-size: 10px;
+    line-height: 14px;
+    font-weight: 400;
+}
+
+.ftn-m-legal a {
+    color: #00B4FA;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+/* Màn hình nhỏ hơn 430px */
+@media (max-width: 400px) {
+    .ftn-mobile {
+        padding: 40px 20px 0;
+    }
+
+    .ftn-mobile .ftn-m-hotline {
+        font-size: 30px;
+        line-height: 40px;
+    }
+
+    .ftn-mobile .ftn-m-title {
+        font-size: 28px;
+        line-height: 32px;
+    }
+
+    .ftn-m-legal {
+        padding: 20px 24px;
+    }
+}

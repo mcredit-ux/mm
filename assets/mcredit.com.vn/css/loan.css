@@ -1,0 +1,479 @@
+/* =====================================================================
+   FILE ĐÃ SỬA THEO SỐ LIỆU TRÍCH XUẤT TRỰC TIẾP TỪ Mcredit_Rework__Copy_.fig
+   Font gốc thiết kế: "Be Vietnam Pro" — cần đảm bảo đã import font này
+   ở CSS global, nếu chưa có hãy thêm:
+   @import "../../fonts.googleapis.com/css2__3bf3247d.css");
+   ===================================================================== */
+
+/* ===== Nút CTA "Xem hướng dẫn vay trả góp ngay" =====
+   Figma: nút NỔI trực tiếp trên ảnh banner, KHÔNG có thanh nền màu riêng.
+   => Bỏ background của .mcredit-cta-bar, chỉ dùng để định vị/căn giữa nút.
+*/
+.mcredit-cta-bar {
+    /* [SỬA] Ghim cố định ở đáy màn hình (theo yêu cầu) — nút sẽ luôn hiện
+       khi người dùng cuộn trang, không còn nằm trong luồng nội dung nữa.
+       Vì giờ nút đè lên nhiều phần khác nhau của trang (không chỉ banner),
+       nên cần có nền + đổ bóng để chữ/nút luôn rõ, khác với bản gốc Figma
+       (Figma chỉ thiết kế nút nổi trên banner, không phải sticky). */
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1050;
+    background: #CAE2FF;
+    /*box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.12);*/
+    padding: 12px 16px;
+    /* tránh bị tai thỏ/thanh home-indicator trên iOS che mất nút */
+    /*padding-bottom: calc(12px + env(safe-area-inset-bottom));*/
+    display: flex;
+    justify-content: center;
+}
+
+/* [MỚI] Vì nút giờ fixed (thoát khỏi luồng trang), cần chừa khoảng trống
+   ở cuối trang để nội dung/footer không bị nút đè lên. Thêm class này
+   vào phần tử ngay sau .mcredit-cta-bar trong HTML (hoặc vào <body>). */
+
+
+.mcredit-cta-btn {
+    display: inline-block;
+    background: #141ED2;
+    color: #fff;
+
+    /* [SỬA] Figma: font-size 20px, weight 600 (không phải 25px/700) */
+    font-size: 20px;
+    font-weight: 600;
+
+    padding: 12px 24px; /* canh cho nút cao ~48px giống Figma (desktop 482x48 / mobile 356x48) */
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    /* [SỬA] Figma: border-radius 8px (không phải 5px) */
+    border-radius: 8px;
+
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+
+.mcredit-cta-btn:hover {
+    /*background: #142257;*/
+    background: rgb(10,115,240);
+    color: #fff;
+}
+
+/*@media (max-width: 767.98px) {*/
+/*    .mcredit-cta-btn {*/
+/*        font-size: 18px; !* Figma không tách riêng size mobile cho nút, giữ gần 20px, giảm nhẹ để không vỡ dòng trên màn nhỏ *!*/
+/*        padding: 10px 20px;*/
+/*        white-space: normal;*/
+/*        text-align: center;*/
+/*    }*/
+/*}*/
+
+
+/* ===== Section: Tra gop sieu nhanh sieu de (4 feature cards) ===== */
+.mcredit-section-title {
+    color: #141ED2; /* [SỬA] Figma: #141ED2 (không phải #1a2b6d) */
+    font-weight: 700;
+
+    /* [SỬA] Figma desktop: 40px (không phải 32px) */
+    font-size: 40px;
+    line-height: 60px;
+    margin-bottom: 48px;
+}
+
+.mcredit-section-title .mcredit-accent {
+    color: #0A73F0; /* [SỬA] Figma: #0A73F0 (không phải #2E7CF6) */
+}
+
+.mcredit-feature-card {
+    background: linear-gradient(
+            180deg,
+            rgba(138, 170, 251, 0.3) 0%,
+            rgba(237, 242, 255, 0.6) 100%
+    );
+    /* Gradient này đã khớp chính xác với Figma — giữ nguyên */
+    border-radius: 16px; /* đúng cho desktop (290x413, radius 16) */
+    opacity: 1;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+.mcredit-features-section .row {
+    margin-left: -8px;
+    margin-right: -8px;
+}
+
+.mcredit-features-section .row > [class*="col-"] {
+    padding-left: 8px;
+    padding-right: 8px;
+    margin-bottom: 16px;
+}
+
+.mcredit-feature-icon {
+    margin-bottom: 12px;
+    height: 86px; /* [SỬA] tăng nhẹ để chứa icon cao nhất (86px) không bị cắt/thu nhỏ quá mức */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mcredit-feature-icon img {
+    max-width: 129px;
+    max-height: 86px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
+.mcredit-feature-label {
+    /* [SỬA] Figma: 25px, weight 400, màu #0A73F0 (label là dòng NHỎ HƠN nhưng
+       thực ra theo Figma label 25px < value 40px, không phải 18px như cũ) */
+    color: #0A73F0;
+    font-size: 25px;
+    font-weight: 400;
+    line-height: 60px;
+}
+
+.mcredit-feature-value {
+    /* [SỬA] Figma: 40px, weight 700, màu #141ED2 (không phải 25px/#1a2b6d) */
+    color: #141ED2;
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+/* ===== Section: Huong dan vay tra gop qua app (Desktop) =====
+   Figma desktop CHỈ CÓ 6 BƯỚC (không phải 7) và các bước 2-6 CHỈ có 1 dòng
+   tiêu đề, KHÔNG có dòng mô tả phụ. Phần .mcredit-step-desc bên dưới vẫn giữ
+   style dùng chung cho trường hợp bước có mô tả (bước 1), nhưng khi bump
+   xuống 6 bước, các bước 2-6 nên bỏ hẳn thẻ <p class="mcredit-step-desc">
+   trong HTML thay vì để trống — xem ghi chú trong file .cshtml đính kèm.
+*/
+.mcredit-guide-step {
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    transition: background 0.2s ease;
+    cursor: pointer;
+}
+
+.mcredit-guide-step:hover,
+.mcredit-guide-step.active {
+    background: linear-gradient(
+            90deg,
+            rgba(138, 170, 251, 0.16) 1.26%,
+            rgba(237, 242, 255, 0) 100%
+    );
+}
+
+.mcredit-step-badge {
+    display: inline-block;
+    color: #fff;
+
+    /* [SỬA] Figma: 25px (không phải 15px) */
+    font-size: 25px;
+    font-weight: 700; /* Figma: bước active weight 700, bước chưa active weight 400 — xử lý bằng .active bên dưới */
+    line-height: 40px;
+
+    padding: 4px 16px;
+    border-radius: 50px;
+    white-space: nowrap;
+    margin-top: 2px;
+    width: 128px;
+    height: 50px;
+    text-align: center;
+}
+#mcredit-guide-section {
+    scroll-margin-top: 75px; /* >= chiều cao thật của .mcredit-cta-bar trên desktop, đo qua DevTools như trước */
+}
+
+.mcredit-step-text {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.mcredit-guide-step.active .mcredit-step-badge {
+    background: #2E7CF6;
+}
+
+.mcredit-guide-step.active .mcredit-step-title {
+    color: #0A73F0;
+    font-weight: 600;
+}
+
+.mcredit-step-title {
+    color: #141ED2; /* [SỬA] Figma: #141ED2 */
+    font-weight: 400; /* [SỬA] Figma: weight 400 (không phải 500) */
+    font-size: 25px;
+    line-height: 50px;
+    margin-bottom: 0 !important;
+}
+
+.mcredit-step-desc {
+    color: #2E2E2E;
+    font-size: 25px;
+    line-height: 1.5;
+    margin-top: 4px;
+}
+
+/* [SỬA] Chỉ áp dụng ẩn/hiện theo click cho danh sách DESKTOP
+   (#mcreditGuideStepsDesktop). Carousel mobile không nằm trong id này
+   nên mô tả sẽ luôn hiển thị sẵn, không bị ẩn. */
+#mcreditGuideStepsDesktop .mcredit-step-desc {
+    display: none;
+}
+
+#mcreditGuideStepsDesktop .mcredit-guide-step.active .mcredit-step-desc {
+    display: block;
+}
+
+.mcredit-guide-image {
+    max-width: 400px;
+    width: 100%;
+}
+
+/* =====================================================================
+   [MỚI] Thanh tiến trình kiểu "story" cho phần Hướng dẫn trên Mobile.
+   Figma mobile KHÔNG dùng carousel nhiều slide + dot tròn như bản cũ, mà
+   dùng 1 progress-bar ngang bên dưới ảnh điện thoại, hiển thị TỪNG bước
+   một, text dạng 1 dòng "Bước n: <mô tả>".
+   Đây là gợi ý CSS cho cấu trúc mới; phần JS chuyển bước (swipe/next) cần
+   viết thêm, không nằm trong scope của patch CSS này.
+   ===================================================================== */
+.mcredit-progress-track {
+    width: 100%;
+    max-width: 160px;
+    height: 6px;
+    background: #E6E6E6;
+    border-radius: 4px;
+    margin: 16px auto 0;
+    overflow: hidden;
+}
+
+.mcredit-progress-active {
+    height: 6px;
+    background: #0A73F0;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.mcredit-mobile-step-text {
+    font-size: 16px;
+    color: #0A73F0;
+    text-align: center;
+    margin-top: 12px;
+}
+
+.mcredit-mobile-step-text strong {
+    font-weight: 700;
+}
+
+
+/* ===== Carousel cac buoc tren mobile (bản cũ — nên thay bằng progress-bar ở trên) ===== */
+.mcredit-steps-carousel .carousel-item .mcredit-guide-step {
+    margin-bottom: 0;
+    cursor: default;
+}
+
+.mcredit-steps-carousel .carousel-item .mcredit-guide-image {
+    margin-top: 16px;
+}
+
+.mcredit-carousel-indicators {
+    position: static;
+    margin: 12px 0 0;
+}
+
+.mcredit-carousel-indicators li {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #C9D6F5;
+    opacity: 1;
+    text-indent: -9999px;
+}
+
+.mcredit-carousel-indicators li.active {
+    background-color: #2E7CF6;
+}
+.mcredit-guide-section{
+    background: #F5F8FF;
+}
+.mobile-break {
+    display: none;
+}
+/* Mobile mặc định */
+
+/* Tablet */
+@media (max-width: 768px) {
+    .mcredit-cta-btn {
+        font-size: 18px; /* Figma không tách riêng size mobile cho nút, giữ gần 20px, giảm nhẹ để không vỡ dòng trên màn nhỏ */
+        padding: 10px 20px;
+        white-space: normal;
+        text-align: center;
+    }
+    .mcredit-features-section .row {
+        margin-left: -6px;
+        margin-right: -6px;
+    }
+    .mobile-break {
+        display: block;
+    }
+
+    .mcredit-features-section .row > [class*="col-"] {
+        padding: 8px;
+        margin-bottom: 0px;
+    }
+    .mcredit-section-title {
+        font-size: 20px; /* [SỬA] Figma mobile: 20px (không phải 24px) */
+        line-height: 30px;
+        margin-bottom: 0 !important;
+    }
+
+    .mcredit-feature-card {
+        aspect-ratio: 1 / 1;      /* [SỬA] Figma mobile: card vuông 184x184 */
+        min-height: 184px;
+        max-width: 184px;
+        margin: 0 auto;
+        border-radius: 32px;      /* [SỬA] Figma mobile: radius 32 (không phải 16) */
+        padding: 16px 12px;
+    }
+    .mcredit-feature-label {
+        font-size: 16px;
+        line-height: 30px;
+    }
+    .mcredit-feature-value {
+        font-size: 20px;
+        line-height: 30px;
+    }
+    .mcredit-step-title {
+        font-size: 18px;
+        line-height: 1.4;
+    }
+    .mcredit-feature-icon{
+        height: 40px;
+    }
+
+    .mcredit-step-desc {
+        font-size: 16px;
+        line-height: 24px;
+        text-align: center;
+        font-weight: 700;
+    }
+    .mcredit-title-mobile{
+        margin-bottom: 25px !important;
+    }
+
+    .mcredit-guide-step {
+        padding: 14px 16px;
+    }
+    .mcredit-feature-icon img {
+        max-width: 56.5px;
+        max-height: 36px;
+    }
+    .mcredit-carousel-control {
+        width: 15%;
+        opacity: 1;                 /* Bootstrap mặc định opacity: .5 */
+        z-index: 5;
+    }
+
+    .mcredit-carousel-control:hover,
+    .mcredit-carousel-control:focus {
+        opacity: 1;
+    }
+
+    .mcredit-carousel-arrow-icon {
+        width: 32px;
+        height: 32px;
+        object-fit: contain;
+    }
+
+    /* Tuỳ chọn: nền tròn trắng cho mũi tên nổi rõ trên ảnh nền */
+    .mcredit-carousel-control-prev .mcredit-carousel-arrow-icon,
+    .mcredit-carousel-control-next .mcredit-carousel-arrow-icon {
+        border-radius: 50%;
+    }
+    .mcredit-guide-image {
+        width: clamp(240px, 70vw, 340px);
+    }
+
+    .mcredit-steps-carousel {
+        position: relative; /* đảm bảo carousel là điểm neo cho mũi tên absolute */
+        --mc-phone-w: clamp(200px, 60vw, 300px); /* trùng với width ảnh đang dùng */
+        --mc-arrow-gap: 36px; /* khoảng cách từ mép ảnh đến mũi tên — chỉnh số này để tăng/giảm */
+    }
+
+    .mcredit-carousel-control {
+        position: absolute;
+        top: 50%;
+        bottom: auto;
+        transform: translateY(-50%);
+        width: auto;           /* bỏ width: 15% cũ, để mũi tên chỉ to bằng đúng icon */
+        height: auto;
+        padding: 12px;
+    }
+
+    .mcredit-carousel-control-prev {
+        left: 12px;
+        right: auto;
+    }
+
+    .mcredit-carousel-control-next {
+        right: 12px;
+        left: auto;
+    }
+
+    .mcredit-carousel-arrow-icon {
+        width: 32px;
+        height: 32px;
+        object-fit: contain;
+    }
+    .mcredit-carousel-control {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: auto;
+        height: auto;
+    }
+
+    .mcredit-carousel-control-prev {
+        left: calc(50% - (var(--mc-phone-w) / 2) - var(--mc-arrow-gap) - 32px);
+        /* trừ thêm 32px = chiều rộng icon, để tính từ MÉP NGOÀI của icon tới ảnh */
+        right: auto;
+    }
+
+    .mcredit-carousel-control-next {
+        right: calc(50% - (var(--mc-phone-w) / 2) - var(--mc-arrow-gap) - 32px);
+        left: auto;
+    }
+    .mcredit-steps-carousel .mcredit-step-desc {
+        white-space: nowrap;
+        font-size: clamp(12px, 3.8vw, 16px);      /* chữ co theo màn hình để vế dài nhất luôn vừa 1 dòng */
+        overflow: visible;
+    }
+}
+
+@media (min-width: 1024px) {
+    .mcredit-feature-card {
+        min-height: 413px;
+        max-width: 290px;
+    }
+    .mcredit-step-badge{
+        background: #141ED2;
+    }
+    .mcredit-feature-icon {
+        margin-bottom: 24px; /* gấp đôi 12px */
+    }
+}
+.content-b{
+    color: #0A73F0;
+    font-weight: 700;
+}
