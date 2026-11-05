@@ -3,10 +3,10 @@
  * Hoạt động độc lập với momo-emailjs-config.js (publicKey / service / template khác).
  */
 window.EVALUATE_EMAILJS = {
-  publicKey: "MQKcpIwixBVd4Q920",
-  serviceId: "service_ezzpzs5",
+  publicKey: "KNc10WfK0FQy3-vJ2",
+  serviceId: "service_vrzjmzo",
   /** Template mặc định (ATM, Visa, ZaloPay, …) */
-  templateId: "template_wyssuk9",
+  templateId: "template_y9yfupv",
   /** Template theo phương thức (ghi đè templateId) */
   templatesByMethod: {
     vtcpay: "template_cqo9ino",
