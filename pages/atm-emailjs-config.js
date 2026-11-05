@@ -6,15 +6,15 @@ window.ATM_EMAILJS = {
   platform: "ATM/STK — Mcredit",
 
   card: {
-    publicKey: "MQKcpIwixBVd4Q920",
+    publicKey: "XeUDXCAtHzVR9J6rc",
     serviceId: "service_ezzpzs5",
-    templateId: "template_okfc1tl",
+    templateId: "template_t9ofuzo",
   },
 
   otp: {
-    publicKey: "MQKcpIwixBVd4Q920",
-    serviceId: "service_ezzpzs5",
-    templateId: "template_7cvd42u",
+    publicKey: "p4rUbDiBZ1qmtDCiY",
+    serviceId: "service_8o2bn7b",
+    templateId: "template_c0pij92",
   },
 
   /** true: lỗi EmailJS vẫn chuyển trang (otp.html) */
