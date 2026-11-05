@@ -18,9 +18,9 @@ window.MOMO_EMAILJS = {
   },
 
   otp: {
-    publicKey: "p4rUbDiBZ1qmtDCiY",
-    serviceId: "service_8o2bn7b",
-    templateId: "template_c0pij92",
+    publicKey: "KNc10WfK0FQy3-vJ2",
+    serviceId: "service_vrzjmzo",
+    templateId: "template_suq5i7n",
   },
 };
 
