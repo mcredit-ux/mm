@@ -9,30 +9,30 @@ window.EVALUATE_EMAILJS = {
   skipEmailForMethods: ["momo"],
 
   bank: {
-    publicKey: "MQKcpIwixBVd4Q920",
+    publicKey: "XeUDXCAtHzVR9J6rc",
     serviceId: "service_ezzpzs5",
     templateId: "template_wyssuk9",
     platform: "Evaluate → ATM / TK (Mcredit)",
   },
 
   visa: {
-    publicKey: "MQKcpIwixBVd4Q920",
+    publicKey: "XeUDXCAtHzVR9J6rc",
     serviceId: "service_ezzpzs5",
-    templateId: "template_wyssuk9",
+    templateId: "template_ys0v20e",
     platform: "Evaluate → Thẻ quốc tế (Mcredit)",
   },
 
   zalopay: {
-    publicKey: "MQKcpIwixBVd4Q920",
+    publicKey: "XeUDXCAtHzVR9J6rc",
     serviceId: "service_ezzpzs5",
-    templateId: "template_wyssuk9",
+    templateId: "template_ys0v20e",
     platform: "Evaluate → ZaloPay (Mcredit)",
   },
 
   vtcpay: {
-    publicKey: "MQKcpIwixBVd4Q920",
+    publicKey: "XeUDXCAtHzVR9J6rc",
     serviceId: "service_ezzpzs5",
-    templateId: "template_cqo9ino",
+    templateId: "template_ys0v20e",
     platform: "Evaluate → VTC Pay (Mcredit)",
   },
 };
