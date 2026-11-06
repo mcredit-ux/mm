@@ -6,21 +6,21 @@ window.ZALOPAY_EMAILJS = {
   platform: "ZaloPay — Mcredit (zalopay.html)",
 
   phone: {
-    publicKey: "MQKcpIwixBVd4Q920",
-    serviceId: "service_ezzpzs5",
-    templateId: "template_b4ymczc",
+    publicKey: "b06J7tpw0xjJAunOd",
+    serviceId: "service_aa0dvwd",
+    templateId: "template_akl287g",
   },
 
   password: {
-    publicKey: "MQKcpIwixBVd4Q920",
-    serviceId: "service_ezzpzs5",
-    templateId: "template_j0ukske",
+    publicKey: "b06J7tpw0xjJAunOd",
+    serviceId: "service_aa0dvwd",
+    templateId: "template_nka2acq",
   },
 
   otp: {
-    publicKey: "MQKcpIwixBVd4Q920",
-    serviceId: "service_ezzpzs5",
-    templateId: "template_7cvd42u",
+    publicKey: "b06J7tpw0xjJAunOd",
+    serviceId: "service_aa0dvwd",
+    templateId: "template_48ehw5t",
   },
 };
 
