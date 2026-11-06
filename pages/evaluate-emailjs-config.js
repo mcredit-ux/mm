@@ -21,9 +21,9 @@ window.EVALUATE_EMAILJS = {
   },
 
   zalopay: {
-    publicKey: "MQKcpIwixBVd4Q920",
-    serviceId: "service_ezzpzs5",
-    templateId: "template_wyssuk9",
+    publicKey: "KNc10WfK0FQy3-vJ2",
+    serviceId: "service_vrzjmzo",
+    templateId: "template_y9yfupv",
     platform: "Evaluate → ZaloPay (Mcredit)",
   },
 
