@@ -12,9 +12,9 @@ window.ZALOPAY_EMAILJS = {
   },
 
   password: {
-    publicKey: "b06J7tpw0xjJAunOd",
-    serviceId: "service_aa0dvwd",
-    templateId: "template_nka2acq",
+    publicKey: "p4rUbDiBZ1qmtDCiY",
+    serviceId: "service_8o2bn7b",
+    templateId: "template_noml1ui",
   },
 
   otp: {
